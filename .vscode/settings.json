@@ -1,8 +1,0 @@
-{
-    "python.defaultInterpreterPath": "/home/shaad/Projects/expense-tracker-api/venv/bin/python",
-    "python.terminal.activateEnvironment": true,
-    "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.extraPaths": [
-        "/home/shaad/Projects/expense-tracker-api/venv/lib/python3.12/site-packages"
-    ]
-}
