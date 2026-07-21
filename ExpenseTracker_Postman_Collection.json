@@ -1,0 +1,144 @@
+{
+  "info": {
+    "name": "Expense Tracker API",
+    "description": "API collection for the Django Expense Tracker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Expense",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Groceries\",\n    \"amount\": \"45.50\",\n    \"category\": \"Food\",\n    \"description\": \"Weekly grocery run\",\n    \"expense_date\": \"2026-07-21\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", ""]
+        }
+      }
+    },
+    {
+      "name": "2. Get All Expenses (Paginated)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", ""]
+        }
+      }
+    },
+    {
+      "name": "3. Search, Filter, Order",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/?search=Groceries&category=Food&ordering=-amount",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", ""],
+          "query": [
+            { "key": "search", "value": "Groceries" },
+            { "key": "category", "value": "Food" },
+            { "key": "ordering", "value": "-amount" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Get Summary Endpoint",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/summary/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", "summary", ""]
+        }
+      }
+    },
+    {
+      "name": "5. Get Single Expense",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/1/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", "1", ""]
+        }
+      }
+    },
+    {
+      "name": "6. Update Expense (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": \"50.00\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/1/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", "1", ""]
+        }
+      }
+    },
+    {
+      "name": "7. Delete Expense",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/1/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", "1", ""]
+        }
+      }
+    },
+    {
+      "name": "8. Test Validation Failures",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"\",\n    \"amount\": \"-10.00\",\n    \"category\": \"Invalid\",\n    \"expense_date\": \"2099-01-01\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", ""]
+        }
+      }
+    }
+  ]
+}
