@@ -89,4 +89,36 @@ class TestExpenseAPI:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['total_entries'] == 2
-        assert response.data['total_expense'] == 20.50
+        assert response.data['total_expense'] == Decimal('20.50')
+
+    def test_summary_endpoint_with_filters(self, api_client, expense):
+        Expense.objects.create(
+            title='Train Ticket',
+            amount='15.00',
+            category='Transport',
+            expense_date=timezone.now().date()
+        )
+        # Filter by category
+        url = f"{reverse('expense-summary')}?category=Food"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['total_entries'] == 1
+        assert response.data['total_expense'] == Decimal('5.50')
+
+        # Filter by search
+        url = f"{reverse('expense-summary')}?search=Train"
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['total_entries'] == 1
+        assert response.data['total_expense'] == Decimal('15.00')
+
+    def test_summary_endpoint_empty_db(self, api_client):
+        Expense.objects.all().delete()
+        url = reverse('expense-summary')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['total_entries'] == 0
+        assert response.data['total_expense'] == Decimal('0.00')
+        assert isinstance(response.data['total_expense'], Decimal)
+        assert isinstance(response.data['average_expense'], Decimal)
+

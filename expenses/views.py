@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count, Avg, Max, Min
 from .models import Expense
 from .serializers import ExpenseSerializer
+
 
 class ExpensePagination(PageNumberPagination):
     """
@@ -35,7 +37,8 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         """
         Custom endpoint to get a summary of all expenses.
         """
-        summary_data = self.get_queryset().aggregate(
+        queryset = self.filter_queryset(self.get_queryset())
+        summary_data = queryset.aggregate(
             total_expense=Sum('amount'),
             total_entries=Count('id'),
             average_expense=Avg('amount'),
@@ -45,16 +48,16 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         
         if summary_data['total_entries'] == 0:
             summary_data = {
-                'total_expense': 0.0,
+                'total_expense': Decimal('0.00'),
                 'total_entries': 0,
-                'average_expense': 0.0,
-                'highest_expense': 0.0,
-                'lowest_expense': 0.0
+                'average_expense': Decimal('0.00'),
+                'highest_expense': Decimal('0.00'),
+                'lowest_expense': Decimal('0.00')
             }
         else:
-            summary_data['total_expense'] = round(summary_data['total_expense'], 2) if summary_data['total_expense'] else 0.0
-            summary_data['average_expense'] = round(summary_data['average_expense'], 2) if summary_data['average_expense'] else 0.0
-            summary_data['highest_expense'] = round(summary_data['highest_expense'], 2) if summary_data['highest_expense'] else 0.0
-            summary_data['lowest_expense'] = round(summary_data['lowest_expense'], 2) if summary_data['lowest_expense'] else 0.0
+            summary_data['total_expense'] = round(summary_data['total_expense'], 2) if summary_data['total_expense'] is not None else Decimal('0.00')
+            summary_data['average_expense'] = round(summary_data['average_expense'], 2) if summary_data['average_expense'] is not None else Decimal('0.00')
+            summary_data['highest_expense'] = round(summary_data['highest_expense'], 2) if summary_data['highest_expense'] is not None else Decimal('0.00')
+            summary_data['lowest_expense'] = round(summary_data['lowest_expense'], 2) if summary_data['lowest_expense'] is not None else Decimal('0.00')
 
         return Response(summary_data)

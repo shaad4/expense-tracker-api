@@ -38,7 +38,7 @@ class Expense(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-expense_date']
+        ordering = ['-expense_date','-created_at']
 
     def __str__(self):
         return f"{self.title} - {self.amount}"
