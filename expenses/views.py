@@ -7,7 +7,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count, Avg, Max, Min
 from .models import Expense
-from .serializers import ExpenseSerializer
+from .serializers import ExpenseSerializer, DateRangeSerializer
+
 
 
 class ExpensePagination(PageNumberPagination):
@@ -61,3 +62,30 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             summary_data['lowest_expense'] = round(summary_data['lowest_expense'], 2) if summary_data['lowest_expense'] is not None else Decimal('0.00')
 
         return Response(summary_data)
+
+    @action(detail=False, methods=['get'], url_path='date-range')
+    def date_range(self, request):
+        """
+        Get expenses within a specific date range.
+        Query parameters:
+        - start_date (YYYY-MM-DD)
+        - end_date (YYYY-MM-DD)
+        """
+        query_serializer = DateRangeSerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        
+        validated_data = query_serializer.validated_data
+        start_date = validated_data['start_date']
+        end_date = validated_data['end_date']
+        
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset = queryset.filter(expense_date__range=[start_date, end_date])
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+            
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+

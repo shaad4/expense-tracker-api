@@ -139,6 +139,24 @@
           "path": ["expenses", ""]
         }
       }
+    },
+    {
+      "name": "9. Get Expenses by Date Range",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/expenses/date-range/?start_date=2026-07-01&end_date=2026-07-31",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["expenses", "date-range", ""],
+          "query": [
+            { "key": "start_date", "value": "2026-07-01" },
+            { "key": "end_date", "value": "2026-07-31" }
+          ]
+        }
+      }
     }
   ]
 }

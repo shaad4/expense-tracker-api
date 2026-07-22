@@ -122,3 +122,86 @@ class TestExpenseAPI:
         assert isinstance(response.data['total_expense'], Decimal)
         assert isinstance(response.data['average_expense'], Decimal)
 
+    def test_date_range_endpoint_success(self, api_client, expense):
+        # Create expenses outside and inside the range
+        today = timezone.now().date()
+        Expense.objects.create(
+            title='Yesterday Expense',
+            amount='12.50',
+            category='Shopping',
+            expense_date=today - timedelta(days=1)
+        )
+        Expense.objects.create(
+            title='Tomorrow Expense',
+            amount='18.00',
+            category='Shopping',
+            expense_date=today + timedelta(days=1) # wait, future is blocked by model validation but test_db might bypass or raise error, wait! Let's check models.py: validate_past_or_today. Oh! Expense cannot be in the future. Let's make it past.
+        )
+        # Let's create:
+        # 1. 5 days ago
+        # 2. 2 days ago (which is start_date)
+        # 3. Today (which is end_date)
+        # range: 3 days ago to today.
+        Expense.objects.all().delete()
+        
+        e1 = Expense.objects.create(
+            title='5 days ago',
+            amount='10.00',
+            category='Shopping',
+            expense_date=today - timedelta(days=5)
+        )
+        e2 = Expense.objects.create(
+            title='3 days ago',
+            amount='20.00',
+            category='Food',
+            expense_date=today - timedelta(days=3)
+        )
+        e3 = Expense.objects.create(
+            title='1 day ago',
+            amount='30.00',
+            category='Food',
+            expense_date=today - timedelta(days=1)
+        )
+        
+        url = reverse('expense-date-range')
+        response = api_client.get(url, {
+            'start_date': (today - timedelta(days=3)).strftime('%Y-%m-%d'),
+            'end_date': today.strftime('%Y-%m-%d')
+        })
+        assert response.status_code == status.HTTP_200_OK
+        # Since pagination is active, let's check results key or list
+        # Wait, how is pagination output structured? ExpensePagination has page_size = 10.
+        # Since we have 2 records in range (e2 and e3), they will fit in page 1.
+        # Let's assert 'results' is in response.data or it's a list.
+        # Let's check if the paginated structure has results. Yes, DRF's standard PageNumberPagination uses 'results'.
+        assert 'results' in response.data
+        results = response.data['results']
+        assert len(results) == 2
+        titles = [r['title'] for r in results]
+        assert '3 days ago' in titles
+        assert '1 day ago' in titles
+        assert '5 days ago' not in titles
+
+    def test_date_range_endpoint_validation_errors(self, api_client):
+        url = reverse('expense-date-range')
+        today = timezone.now().date()
+
+        # Missing params
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        # start_date > end_date
+        response = api_client.get(url, {
+            'start_date': today.strftime('%Y-%m-%d'),
+            'end_date': (today - timedelta(days=1)).strftime('%Y-%m-%d')
+        })
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        # Invalid date format
+        response = api_client.get(url, {
+            'start_date': 'invalid-date',
+            'end_date': today.strftime('%Y-%m-%d')
+        })
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+

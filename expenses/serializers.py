@@ -24,3 +24,17 @@ class ExpenseSerializer(serializers.ModelSerializer):
         if value > timezone.now().date():
             raise serializers.ValidationError("Expense date cannot be in the future.")
         return value
+
+
+class DateRangeSerializer(serializers.Serializer):
+    """
+    Serializer to validate date range query parameters.
+    """
+    start_date = serializers.DateField(required=True)
+    end_date = serializers.DateField(required=True)
+
+    def validate(self, data):
+        if data['start_date'] > data['end_date']:
+            raise serializers.ValidationError("start_date cannot be after end_date.")
+        return data
+
